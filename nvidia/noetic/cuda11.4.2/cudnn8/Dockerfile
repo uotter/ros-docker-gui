@@ -3,6 +3,11 @@ FROM turlucode/ros-noetic:cuda11.4.2
 MAINTAINER Athanasios Tasoglou <athanasios@tasoglou.net>
 LABEL Description="ROS-Noetic-Desktop with CUDA 11.4.2 and cuDNN 8 support (Ubuntu 20.04)" Vendor="TurluCode" Version="1.0"
 
+# change source to aliyun
+RUN sed -i s/archive.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list \
+    && sed -i s/security.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list
+
+
 # Install packages without prompting the user to answer any questions
 ENV DEBIAN_FRONTEND noninteractive 
 

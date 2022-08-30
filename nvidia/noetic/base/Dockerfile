@@ -7,6 +7,10 @@ LABEL com.turlucode.ros.version="noetic"
 # Install packages without prompting the user to answer any questions
 ENV DEBIAN_FRONTEND noninteractive 
 
+# change source to aliyun
+RUN sed -i s/archive.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list \
+    && sed -i s/security.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list
+
 # Install packages
 RUN apt-get update && apt-get install -y \
 locales \
@@ -23,6 +27,7 @@ htop \
 libssl-dev \
 build-essential \
 dbus-x11 \
+tmux \
 software-properties-common \
 gdb valgrind && \
 apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -35,8 +40,9 @@ cd .. && rm -rf cmake
 # Install tmux 3.2
 RUN apt-get update && apt-get install -y automake autoconf pkg-config libevent-dev libncurses5-dev bison && \
 apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN git clone https://github.com/tmux/tmux.git && \
-cd tmux && git checkout tags/3.2 && ls -la && sh autogen.sh && ./configure && make -j8 && make install
+#RUN git config --global http.postBuffer 524288000 && \
+#git clone https://gitclone.com/github.com/tmux/tmux.git && \
+#cd tmux && git checkout tags/3.2 && ls -la && sh autogen.sh && ./configure && make -j8 && make install
 
 # Install new paramiko (solves ssh issues)
 RUN apt-add-repository universe
