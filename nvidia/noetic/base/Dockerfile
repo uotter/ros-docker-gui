@@ -28,6 +28,8 @@ libssl-dev \
 build-essential \
 dbus-x11 \
 tmux \
+gedit \
+vim \
 software-properties-common \
 gdb valgrind && \
 apt-get clean && rm -rf /var/lib/apt/lists/*
