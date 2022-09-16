@@ -25,11 +25,51 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV NV_CUDNN_PACKAGE_DEV "libcudnn8-dev=$NV_CUDNN_VERSION-1+cuda11.4"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    tmux \
+    gedit \
+    vim \
+    mlocate \
+    ros-noetic-ros-controllers \
+    ros-noetic-roboticsgroup-upatras-gazebo-plugins  \
     ${NV_CUDNN_PACKAGE} \
     ${NV_CUDNN_PACKAGE_DEV} && \
     rm -rf /var/lib/apt/lists/*
 
 RUN apt-mark hold libcudnn8
+
+# install miniconda for root
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
+
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && mkdir /root/.conda \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh \
+# init conda for shell
+RUN conda init bash \
+    && conda init zsh
+
+# Make RUN commands use the new environment:
+RUN echo "conda activate ros_base" >> ~/.bashrc \
+    && echo "conda activate ros_base" >> ~/.zshrc \
+    && conda --version
+
+COPY ./env/ros_base.yml .
+RUN conda env create -f ros_base.yml
+# Initialize conda in bash config fiiles:
+SHELL ["conda", "run", "-n", "ros_base", "/bin/bash", "-c"]
+
+# add catkin_pkg to path for using in conda env
+ENV PYTHONPATH "${PYTHONPATH}:/usr/lib/python3/dist-packages"
+# uninstall the pip or else there will be error when using pip command in container
+RUN apt-get remove --purge -y python3-pip
+# uninstall the older version setuptools installed by the ros noetic
+RUN pip uninstall -y setuptools
+
+RUN git clone https://github.com/stevengj/nlopt.git && cd nlopt && mkdir build && cd build \
+    && cmake .. && make && sudo make install \
+    && rm -rf cmake
 
 # Launch terminator
 CMD ["terminator"]
